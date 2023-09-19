@@ -61,6 +61,21 @@ jobs:
       - name: "extract ct-ng"
         run: |
           tar -xf ct-ng.tar
+      - name: cache tarballs
+        id: cache
+        uses: actions/cache@v3
+        with:
+          path: src.tar
+          key: src.tar-${{ hashFiles('packages') }}-${{ hashFiles('samples') }}
+          restore-keys: |
+            src.tar-${{ hashFiles('packages') }}-
+            src.tar-
+      - name: extract tarballs
+        if: ${{ steps.cache.outputs.cache-hit == 'true' }}
+        continue-on-error: true
+        run: |
+          tar -xvf src.tar
+          touch stamp
       - name: "prereq Linux"
         if: ${{ runner.os == 'Linux' }}
         run: |
@@ -82,6 +97,7 @@ jobs:
                 ct-ng olddefconfig; \
                 ct-ng source; \
           done
+          find ./.local/src -type f -not -newer stamp -delete -print || true
           tar -cvf src.tar src
       - name: "upload sources"
         uses: actions/upload-artifact@v3
