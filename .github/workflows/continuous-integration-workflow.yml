@@ -62,12 +62,13 @@ jobs:
         run: |
           tar -xf ct-ng.tar
       - name: download tarballs
+        id: dltars
         uses: actions/download-artifact@v3
         continue-on-error: true
         with:
           name: src.tar
       - name: extract tarballs
-        if: ${{ success() }}
+        if: ${{ needs.build.steps.dltars.outcome != 'failure' }}
         continue-on-error: true
         run: |
           tar -xvf src.tar
